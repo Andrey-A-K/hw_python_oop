@@ -24,11 +24,8 @@ class Calculator:
         return dt.datetime.now().date()
 
     def get_stats(self, date):  # возвращает сумму за указанную дату
-        total = 0
-        for record in self.records:
-            if record.date == date:
-                total += record.amount
-        return total
+        return sum(record.amount for record in self.records
+                   if record.date == date)
 
     def get_today_stats(self):  # возвращает сумму за сегодня
         today = self.date_now()
@@ -38,43 +35,39 @@ class Calculator:
         return abs(self.limit - self.get_today_stats())
 
     def get_week_stats(self):  # возвращает сумму за 7 дней
-        today = self.date_now()
-        total = 0
-        for i in range(7):
-            date = today - dt.timedelta(days=i)
-            total += self.get_stats(date)
-        return total
+        return sum(n.amount for n in self.records if self.date_now() >=
+                   n.date >= self.date_now() - dt.timedelta(days=7))
 
 
 class CaloriesCalculator(Calculator):
     def get_calories_remained(self):
-        if self.get_today_stats() >= self.limit:
+        comparison = self.get_today_stats() >= self.limit
+        if comparison:
             return 'Хватит есть!'
         else:
-            return (f'Сегодня можно съесть что-нибудь ещё, '
+            return ('Сегодня можно съесть что-нибудь ещё, '
                     f'но с общей калорийностью не более '
                     f'{self.today_remained()} кКал')
 
 
 class CashCalculator(Calculator):
-    USD_RATE = 74.0
-    EURO_RATE = 90.0
+    USD_RATE = 60.0
+    EURO_RATE = 70.0
     RUB_RATE = 1
+    lists = {'rub': ['руб', RUB_RATE],
+             'usd': ['USD', USD_RATE],
+             'eur': ['Euro', EURO_RATE]}
+
+    def remains(self, currency):
+        return round((self.today_remained() / self.lists[currency][1]), 2)
 
     def get_today_cash_remained(self, currency):
-        if currency == 'rub':
-            return self.get_for_currency('руб', self.RUB_RATE)
-        elif currency == 'usd':
-            return self.get_for_currency('USD', self.USD_RATE)
-        elif currency == 'eur':
-            return self.get_for_currency('Euro', self.EURO_RATE)
-
-    def get_for_currency(self, currency, rate):
-        if self.get_today_stats() == self.limit:
-            return('Денег нет, держись')
-        elif self.get_today_stats() < self.limit:
-            return(f'На сегодня осталось '
-                   f'{round((self.today_remained() / rate ), 2)} {currency}')
+        comparison = self.limit - self.get_today_stats()
+        if comparison == 0:
+            return ('Денег нет, держись')
+        elif comparison > 0:
+            return (f'На сегодня осталось '
+                    f'{self.remains(currency)} {self.lists[currency][0]}')
         else:
-            return(f'Денег нет, держись: твой долг - '
-                   f'{round((self.today_remained() / rate ), 2)} {currency}')
+            return (f'Денег нет, держись: твой долг - '
+                    f'{self.remains(currency)} {self.lists[currency][0]}')
