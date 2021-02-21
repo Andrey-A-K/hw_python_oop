@@ -36,7 +36,7 @@ class Calculator:
 
     def get_week_stats(self):  # возвращает сумму за 7 дней
         return sum(n.amount for n in self.records if self.date_now()
-                   >= n.date >= self.date_now() - dt.timedelta(days=7))
+                   >= n.date > self.date_now() - dt.timedelta(days=7))
 
 
 class CaloriesCalculator(Calculator):
@@ -46,7 +46,7 @@ class CaloriesCalculator(Calculator):
             return 'Хватит есть!'
         else:
             return ('Сегодня можно съесть что-нибудь ещё, '
-                    f'но с общей калорийностью не более '
+                    'но с общей калорийностью не более '
                     f'{self.today_remained()} кКал')
 
 
@@ -63,11 +63,12 @@ class CashCalculator(Calculator):
 
     def get_today_cash_remained(self, currency):
         comparison = self.limit - self.get_today_stats()
+        money = self.lists[currency][0]
         if comparison == 0:
             return ('Денег нет, держись')
         elif comparison > 0:
-            return (f'На сегодня осталось '
-                    f'{self.remains(currency)} {self.lists[currency][0]}')
+            return ('На сегодня осталось '
+                    f'{self.remains(currency)} {money}')
         else:
             return (f'Денег нет, держись: твой долг '
-                    f'- {self.remains(currency)} {self.lists[currency][0]}')
+                    f'- {self.remains(currency)} {money}')
