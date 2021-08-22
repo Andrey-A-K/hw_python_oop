@@ -12,6 +12,13 @@ class Record:
 
 
 class Calculator:
+    """
+    родительский класс калькулятора,
+    хранит записи (о еде или деньгах, но по сути - всё числа и даты),
+    знает дневной лимит
+    (сколько в день можно истратить денег или сколько калорий можно получить)
+    и суммирует записи за конкретные даты
+    """
     def __init__(self, limit):
         self.limit = limit
         self.records = []
@@ -40,6 +47,10 @@ class Calculator:
 
 
 class CaloriesCalculator(Calculator):
+    """
+    Калькулятор калорий, считает, превышен ли суточный лимит
+    и, в зависимости от этого, выводит сообщение на экран
+    """
     def get_calories_remained(self):
         comparison = self.get_today_stats() >= self.limit
         if comparison:
@@ -51,6 +62,10 @@ class CaloriesCalculator(Calculator):
 
 
 class CashCalculator(Calculator):
+    """
+    Калькулятор денег, сравнивает потраченную сумму с лимитом
+    и выводит на экран результат и текстовое сообщение-комментарий
+    """
     USD_RATE = 60.0
     EURO_RATE = 70.0
     RUB_RATE = 1
